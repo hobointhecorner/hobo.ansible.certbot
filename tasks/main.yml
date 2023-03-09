@@ -1,0 +1,111 @@
+---
+- name: Set playbook configuration
+  tags:
+    - certbot
+  set_fact:
+    certbot_config_dir: "{{ certbot_config_root }}/{{ certbot_cert_name }}"
+
+- name: Set configuration directories
+  tags:
+    - certbot
+  set_fact:
+    certbot_config_directories:
+      - "{{ certbot_config_root }}"
+      - "{{ certbot_config_dir }}"
+      - "{{ certbot_config_dir }}/mount"
+      - "{{ certbot_config_dir }}/mount/config"
+      - "{{ certbot_config_dir }}/mount/logs"
+      - "{{ certbot_config_dir }}/mount/work"
+      - "{{ certbot_config_dir }}/scripts"
+
+- name: Set container volumes
+  tags:
+    - certbot
+  set_fact:
+    certbot_container_volumes:
+      - "{{ certbot_config_dir }}/mount/:/certbot/:rw"
+
+- name: Set additional container volumes
+  tags:
+    - certbot
+  set_fact:
+    certbot_all_volumes: "{{ certbot_container_volumes + certbot_additional_volumes }}"
+
+- name: Ensure certbot group
+  become: yes
+  tags:
+    - certbot
+  group:
+    name: "{{ certbot_group }}"
+
+- name: Ensure certbot user
+  become: yes
+  tags:
+    - certbot
+  user:
+    name:  "{{ certbot_user }}"
+    group: "{{ certbot_group }}"
+    groups:
+      - docker
+    append: yes
+
+- name: Ensure certbot configuration directories
+  become: yes
+  loop: "{{ certbot_config_directories }}"
+  tags:
+    - certbot
+  file:
+    path: "{{ item }}"
+    owner: "{{ certbot_user }}"
+    group: "{{ certbot_group }}"
+    mode: "2750"
+    state: directory
+
+- name: Template certbot scripts
+  become: yes
+  tags:
+    - certbot
+  template:
+    src: scripts/start_certbot.sh.j2
+    dest: "{{ certbot_config_dir }}/scripts/start_certbot.sh"
+    owner: "{{ certbot_user }}"
+    group: "{{ certbot_group }}"
+    mode: "750"
+
+- name: Template certbot service files
+  notify: Reload certbot service
+  become: yes
+  loop:
+    - service
+    - timer
+  tags:
+    - certbot
+  template:
+    src: "certbot.{{ item }}.j2"
+    dest: /etc/systemd/system/certbot.{{ certbot_cert_name }}.{{ item }}
+
+- name: Request certificate
+  when: certbot_request_cert|bool
+  register: certbot_container
+  become: yes
+  tags:
+    - certbot
+  docker_container:
+    name: certbot
+    image: "{{ certbot_container_image }}"
+    pull: yes
+    detach: no
+    cleanup: yes
+    volumes: "{{ certbot_all_volumes }}"
+    command: |
+      certonly --dns-route53 -d {{ certbot_cert_domain }} --cert-name {{ certbot_cert_name }}
+        --config-dir /certbot/config --work-dir /certbot/work --logs-dir /certbot/logs
+        --agree-tos -m {{ certbot_email }} --non-interactive
+        {{ certbot_request_additional_parameters }}
+
+- name: Output request result
+  when: certbot_container is defined and certbot_container.skipped is not defined
+  tags:
+    - certbot
+  debug:
+    msg: "{{ certbot_container }}"

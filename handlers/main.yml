@@ -1,0 +1,15 @@
+---
+- name: Reload certbot service
+  become: yes
+  systemd:
+    name: certbot.{{ certbot_cert_name }}.{{ item }}
+    enabled: |
+      {% if item == 'timer' -%}
+      {{ true }}
+      {%- else -%}
+      {{ false }}
+      {%- endif %}
+    daemon_reload: yes
+  loop:
+    - service
+    - timer

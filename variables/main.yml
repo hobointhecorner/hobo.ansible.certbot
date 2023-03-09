@@ -1,0 +1,4 @@
+---
+certbot_cert_domain:
+certbot_cert_name:
+certbot_email:

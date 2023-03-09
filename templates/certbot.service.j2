@@ -1,0 +1,10 @@
+[Unit]
+Description=Certbot Renewal {{ certbot_cert_name }}
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User={{ certbot_user }}
+Group={{ certbot_group }}
+ExecStart={{ certbot_config_dir }}/scripts/start_certbot.sh renew --cert-name {{ certbot_cert_name }}
