@@ -46,9 +46,10 @@
   user:
     name:  "{{ certbot_user }}"
     group: "{{ certbot_user }}"
-    groups:
-      - docker
     append: yes
+    groups:
+      - "{{ certbot_group }}"
+      - docker
 
 - name: Ensure group membership(s)
   become: yes
