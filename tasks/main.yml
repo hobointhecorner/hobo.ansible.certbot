@@ -122,3 +122,5 @@
     - certbot
   debug:
     msg: "{{ certbot_container }}"
+
+- meta: flush_handlers
