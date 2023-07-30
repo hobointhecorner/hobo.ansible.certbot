@@ -11,19 +11,18 @@
   set_fact:
     certbot_config_directories:
       - "{{ certbot_config_root }}"
-      - "{{ certbot_config_dir }}"
-      - "{{ certbot_config_dir }}/mount"
-      - "{{ certbot_config_dir }}/mount/config"
-      - "{{ certbot_config_dir }}/mount/logs"
-      - "{{ certbot_config_dir }}/mount/work"
-      - "{{ certbot_config_dir }}/scripts"
+      - "{{ certbot_root_dir }}/mount"
+      - "{{ certbot_root_dir }}/mount/config"
+      - "{{ certbot_root_dir }}/mount/logs"
+      - "{{ certbot_root_dir }}/mount/work"
+      - "{{ certbot_root_dir }}/scripts"
 
 - name: Set container volumes
   tags:
     - certbot
   set_fact:
     certbot_container_volumes:
-      - "{{ certbot_config_dir }}/mount/:/certbot/:rw"
+      - "{{ certbot_root_dir }}/mount/:/certbot/:rw"
 
 - name: Set additional container volumes
   tags:
@@ -80,7 +79,7 @@
     - certbot
   template:
     src: scripts/start_certbot.sh.j2
-    dest: "{{ certbot_config_dir }}/scripts/start_certbot.sh"
+    dest: "{{ certbot_root_dir }}/scripts/start_certbot.sh"
     owner: "{{ certbot_user }}"
     group: "{{ certbot_group }}"
     mode: "750"

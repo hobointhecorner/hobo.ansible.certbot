@@ -7,4 +7,4 @@ Requires=docker.service
 Type=oneshot
 User={{ certbot_user }}
 Group={{ certbot_group }}
-ExecStart={{ certbot_config_dir }}/scripts/start_certbot.sh renew --cert-name {{ certbot_cert_name }}
+ExecStart={{ certbot_root_dir }}/scripts/start_certbot.sh renew --cert-name {{ certbot_cert_name }}
