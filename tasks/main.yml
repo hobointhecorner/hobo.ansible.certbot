@@ -31,12 +31,13 @@
   set_fact:
     certbot_all_volumes: "{{ certbot_container_volumes + certbot_additional_volumes }}"
 
-- name: Ensure certbot group
+- name: Ensure certbot group(s)
   become: yes
   tags:
     - certbot
+  loop: "{{ [certbot_user, certbot_group]|unique }}"
   group:
-    name: "{{ certbot_group }}"
+    name: "{{ item }}"
 
 - name: Ensure certbot user
   become: yes
@@ -44,10 +45,22 @@
     - certbot
   user:
     name:  "{{ certbot_user }}"
-    group: "{{ certbot_group }}"
-    groups:
-      - docker
+    group: "{{ certbot_user }}"
     append: yes
+    groups:
+      - "{{ certbot_group }}"
+      - docker
+
+- name: Ensure group membership(s)
+  become: yes
+  tags:
+    - certbot
+  loop: "{{ certbot_group_members }}"
+  user:
+    name: "{{ item }}"
+    append: yes
+    groups:
+      - "{{ certbot_group }}"
 
 - name: Ensure certbot configuration directories
   become: yes
@@ -109,3 +122,5 @@
     - certbot
   debug:
     msg: "{{ certbot_container }}"
+
+- meta: flush_handlers

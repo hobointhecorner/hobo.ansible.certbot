@@ -6,3 +6,4 @@ certbot_request_additional_parameters:
 certbot_additional_volumes: []
 certbot_user: certbot
 certbot_group: certbot
+certbot_group_members: []
