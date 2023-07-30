@@ -104,7 +104,7 @@
     cleanup: yes
     volumes: "{{ certbot_all_volumes }}"
     command: |
-      certonly --dns-route53 -d {{ certbot_cert_domain }} --cert-name {{ certbot_cert_name }}
+      certonly --standalone --dns-route53 -d {{ certbot_cert_domain }} --cert-name {{ certbot_cert_name }}
         --config-dir /certbot/config --work-dir /certbot/work --logs-dir /certbot/logs
         --agree-tos -m {{ certbot_email }} --non-interactive
         {{ certbot_request_additional_parameters }}
