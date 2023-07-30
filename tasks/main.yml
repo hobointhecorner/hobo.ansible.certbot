@@ -1,16 +1,10 @@
 ---
-- name: Set playbook configuration
-  tags:
-    - certbot
-  set_fact:
-    certbot_config_dir: "{{ certbot_config_root }}/{{ certbot_cert_name }}"
-
 - name: Set configuration directories
   tags:
     - certbot
   set_fact:
     certbot_config_directories:
-      - "{{ certbot_config_root }}"
+      - "{{ certbot_root_dir }}"
       - "{{ certbot_root_dir }}/mount"
       - "{{ certbot_root_dir }}/mount/config"
       - "{{ certbot_root_dir }}/mount/logs"

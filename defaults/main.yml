@@ -1,4 +1,4 @@
-certbot_config_root: /opt/hobo.certbot
+certbot_root_dir: /opt/hobo.certbot
 certbot_container_image: certbot/certbot:latest
 certbot_renewal_interval: weekly
 certbot_request_cert: no
