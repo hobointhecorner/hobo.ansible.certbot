@@ -2,7 +2,7 @@
 
 argInput=$@
 
-/usr/bin/docker run  --rm --name certbot \
+/usr/bin/docker run  --rm --name certbot.{{ certbot_cert_name }} \
 {% for volume in certbot_all_volumes %}
   -v {{ volume }} \
 {% endfor %}
