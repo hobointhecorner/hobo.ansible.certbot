@@ -1,0 +1,20 @@
+---
+name: Reset upstream branch
+on:
+  push:
+   branches:
+    - main
+env:
+  base_branch: main
+  upstream_branch: v2
+jobs:
+  reset:
+    name: Reset version branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reset upstream branch to main
+        uses: nicksnell/action-reset-repo@master
+        with:
+          base_branch: ${{ env.base_branch }}
+          reset_branch: ${{ env.upstream_branch }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

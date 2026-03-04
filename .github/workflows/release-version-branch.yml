@@ -1,0 +1,55 @@
+name: Make release
+on:
+  push:
+   branches:
+    - main
+jobs:
+  make-release:
+    name: Create release
+    runs-on: ubuntu-latest
+    env:
+      changelog_path: CHANGELOG.md
+      CONVCO_INITIAL_BUMP_VERSION: '2.0.0'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Convco init
+        uses: convco/convco-action@v0.2.0
+
+      - name: Get version info
+        id: convco
+        run: |
+          export current_version="$(convco version --print-prefix)"
+          export new_version="$(convco version --bump --print-prefix)"
+          export changelog="$(convco changelog)"
+
+          if [ "$current_version" = "$new_version" ]; then
+            echo "No version change, bumping as patch"
+            new_version="$(convco version --patch --print-prefix)"
+          fi
+
+          convco changelog \
+            --output $changelog_path \
+            --unreleased $new_version \
+            --include-hidden-sections \
+            --max-versions 1
+
+          echo "Current version: $current_version"
+          echo "New Version: $new_version"
+          echo -e "\nChangelog:\n$(cat $changelog_path)"
+
+          echo "current_version=${current_version}" >> $GITHUB_OUTPUT
+          echo "new_version=${new_version}" >> $GITHUB_OUTPUT
+          echo "changelog_path=${changelog_path}" >> $GITHUB_OUTPUT
+
+      - name: Release
+        uses: comnoco/create-release-action@v2.0.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{steps.convco.outputs.new_version}}
+          release_name: ${{steps.convco.outputs.new_version}}
+          body_path: ${{steps.convco.outputs.changelog_path}}
